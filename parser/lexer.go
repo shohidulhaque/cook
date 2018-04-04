@@ -25,8 +25,10 @@ const (
 	itemSemicolon
 	itemLeftBrace
 	itemRightBrace
+	itemDoubleQuotes
 	itemString
 	itemEntity
+	itemImport
 	itemlineBreak
 	itemKeyWord
 	itemBinary
@@ -53,6 +55,7 @@ var key = map[string]itemType{
 	"others":   itemOthers,
 	"file":     itemFile,
 	"deps":     itemDeps,
+	"import":   itemImport,
 }
 
 //lexer  Data Structure for holding the Lexer
@@ -159,6 +162,26 @@ func (lex *lexer) isDelimiter() {
 
 		lex.start = lex.pos + 1
 
+	case '"':
+		if lex.items[len(lex.items)-1].typ == itemDoubleQuotes {
+			tempItem := item{
+				typ:  itemString,
+				pos:  lex.start,
+				val:  strings.TrimSpace(lex.input[lex.start:lex.pos]),
+				line: lex.line,
+			}
+			lex.items = append(lex.items, tempItem)
+		}
+		tempItem := item{
+			typ:  itemDoubleQuotes,
+			pos:  lex.pos,
+			val:  "\"",
+			line: lex.line,
+		}
+
+		lex.items = append(lex.items, tempItem)
+		lex.start = lex.pos + 1
+
 	case '}':
 		tempItem := item{
 			typ:  itemRightBrace,
@@ -171,34 +194,19 @@ func (lex *lexer) isDelimiter() {
 		lex.start = lex.pos + 1
 
 	case '\n':
-		if lex.items[len(lex.items)-1].typ == itemEquals {
-			tempItem := item{
-				typ:  itemString,
-				pos:  lex.start,
-				val:  strings.TrimSpace(lex.input[lex.start:lex.pos]),
-				line: lex.line,
-			}
-			lex.items = append(lex.items, tempItem)
 
-			tempItem = item{
-				typ:  itemSemicolon,
-				pos:  lex.pos,
-				val:  ";",
-				line: lex.line,
-			}
-			lex.items = append(lex.items, tempItem)
-			lex.start = lex.pos + 1
-		}
-	case ';':
 		tempItem := item{
-			typ:  itemString,
-			pos:  lex.start,
-			val:  strings.TrimSpace(lex.input[lex.start:lex.pos]),
+			typ:  itemSemicolon,
+			pos:  lex.pos,
+			val:  ";",
 			line: lex.line,
 		}
 		lex.items = append(lex.items, tempItem)
+		lex.start = lex.pos + 1
 
-		tempItem = item{
+	case ';':
+
+		tempItem := item{
 			typ:  itemSemicolon,
 			pos:  lex.pos,
 			val:  ";",

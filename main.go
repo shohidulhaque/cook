@@ -43,10 +43,8 @@ func main() {
 	manager, err := mg.NewManager(&logger)
 	must(err, &logger)
 
-	Recipe := string(manager.FileData)
-
 	//Parsing the Recipe File
-	parser := ps.NewParser(Recipe, &logger)
+	parser := ps.NewParser(manager.FileData, &logger)
 	err = parser.Parse()
 	must(err, &logger)
 
@@ -59,19 +57,21 @@ func main() {
 		err = manager.ReadDetails()
 		must(err, &logger)
 
-		worker.CompareAndCompile(parser, &manager)
+		err = worker.CompareAndCompile(parser, &manager)
+		must(err, &logger)
 
 	} else {
 		_ = os.Mkdir("Cooking", 0755)
 		err = manager.GenerateList()
 		must(err, &logger)
-		worker.CompileFirst(parser, manager)
+		err = worker.CompileFirst(parser, manager)
+		must(err, &logger)
 	}
 
-	err = manager.WriteDetails()
+	err = worker.Link(parser)
 	must(err, &logger)
 
-	err = worker.Link(parser)
+	err = manager.WriteDetails()
 	must(err, &logger)
 
 	logger.WriteLog()

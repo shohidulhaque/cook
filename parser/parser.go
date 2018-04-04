@@ -33,6 +33,7 @@ type Parser struct {
 	nextItem        item
 	CompilerDetails compiler
 	FileDetails     map[string]params
+	Imports         []string
 	Logger          *lg.Logger
 }
 
@@ -55,11 +56,19 @@ func (par *Parser) Parse() error {
 
 	for par.nextItem.typ != itemEOF {
 		par.next()
+		if par.currentItem.typ == itemImport {
+			if par.nextItem.typ != itemDoubleQuotes {
+				return par.reportError("\"")
+			}
+			identifier = itemImport
+		}
+
 		if par.currentItem.typ == itemEquals {
-			if par.nextItem.typ != itemString {
+			if par.nextItem.typ != itemDoubleQuotes {
 				if par.prevItem.typ == itemEntity {
 					return par.reportError("entity")
 				}
+				return par.reportError("\"")
 			}
 		}
 
