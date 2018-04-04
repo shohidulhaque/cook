@@ -49,98 +49,28 @@ func (par *Parser) next() item {
 //Parse  Function to parse the the Recipe File
 func (par *Parser) Parse() error {
 
-	isCompiler := false
-	enityName := ""
-	identifier := itemNULL
-	params := ""
-
 	for par.nextItem.typ != itemEOF {
 		par.next()
+		//Parsing the imports
 		if par.currentItem.typ == itemImport {
-			if par.nextItem.typ != itemDoubleQuotes {
-				return par.reportError("\"")
+			par.next()
+			if par.currentItem.typ != itemDoubleQuotes {
+				par.reportError("\"")
 			}
-			identifier = itemImport
-		}
-
-		if par.currentItem.typ == itemEquals {
-			if par.nextItem.typ != itemDoubleQuotes {
-				if par.prevItem.typ == itemEntity {
-					return par.reportError("entity")
-				}
-				return par.reportError("\"")
+			par.next()
+			if par.currentItem.typ != itemString {
+				par.reportError("folder name")
 			}
-		}
-
-		if par.currentItem.typ == itemSemicolon {
-			if par.nextItem.typ < itemKeyWord &&
-				par.nextItem.typ != itemRightBrace {
-				return par.reportError("}")
-			}
-
-			if isCompiler {
-				par.fillCompilerDetails(identifier, params)
-
-			} else {
-				par.fillFileDetails(enityName, identifier, params)
+			par.Imports = append(par.Imports, par.currentItem.val)
+			par.next()
+			par.next()
+			if par.currentItem.typ != itemSemicolon {
+				par.reportError("; or new line")
 			}
 		}
-
-		if par.currentItem.typ == itemLeftBrace {
-			if par.nextItem.typ < itemKeyWord {
-				return par.reportError("identifier")
-			}
-		}
-
-		if par.currentItem.typ == itemRightBrace {
-			if par.nextItem.typ != itemEOF &&
-				par.nextItem.typ != itemEntity {
-				return par.reportError("entity")
-			}
-		}
-
-		if par.currentItem.typ == itemString {
-			if par.prevItem.typ == itemEntity {
-				if par.nextItem.typ != itemLeftBrace {
-					return par.reportError("{")
-				}
-
-				if par.currentItem.val == "#" {
-					isCompiler = true
-				} else {
-					isCompiler = false
-				}
-				enityName = par.currentItem.val
-
-			} else {
-				if par.nextItem.typ != itemSemicolon {
-					return par.reportError(";")
-				}
-				params = par.currentItem.val
-			}
-
-		}
-
+		//Parsing the entity
 		if par.currentItem.typ == itemEntity {
-			if par.nextItem.typ != itemString {
-				return par.reportError("entity name")
-			}
-
-			if par.currentItem.val == "#" {
-				isCompiler = true
-			} else {
-				isCompiler = false
-			}
-
-			enityName = par.currentItem.val
-		}
-
-		if par.currentItem.typ > itemKeyWord {
-			if par.nextItem.typ != itemEquals {
-				return par.reportError("=")
-			}
-
-			identifier = par.currentItem.typ
+			par.parseEntity()
 		}
 	}
 	par.Logger.ReportSuccess("Successfully parsed Recipe file")
@@ -153,6 +83,44 @@ func (par *Parser) reportError(expected string) error {
 		": Expected " + expected + " , found " + par.nextItem.val)
 	par.Logger.ReportError(syntaxError.Error())
 	return syntaxError
+}
+
+//ParseEntity  Function for parsing an entity
+func (par *Parser) parseEntity() {
+	par.next()
+	if par.currentItem.typ != itemString {
+		par.reportError("entity name")
+	}
+	name := par.currentItem.val
+	isCompiler := false
+	identifier := itemNULL
+	params := ""
+	if name == "#" {
+		isCompiler = true
+	}
+	par.next()
+	if par.currentItem.typ != itemLeftBrace {
+		par.reportError("{")
+	}
+
+	for par.next().typ != itemRightBrace {
+		if par.currentItem.typ > itemKeyWord {
+			identifier = par.currentItem.typ
+			params = ""
+		}
+
+		if par.currentItem.typ == itemString {
+			params = par.currentItem.val
+		}
+
+		if par.currentItem.typ == itemSemicolon {
+			if isCompiler == true {
+				par.fillCompilerDetails(identifier, params)
+			} else {
+				par.fillFileDetails(name, identifier, params)
+			}
+		}
+	}
 }
 
 //fillCompilerDetails  Function to store the compiler details

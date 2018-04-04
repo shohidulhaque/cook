@@ -27,10 +27,10 @@ const (
 	itemRightBrace
 	itemDoubleQuotes
 	itemString
+	itemKeyWord
 	itemEntity
 	itemImport
-	itemlineBreak
-	itemKeyWord
+	itemEntityKeyWord
 	itemBinary
 	itemName
 	itemStart
@@ -216,7 +216,7 @@ func (lex *lexer) isDelimiter() {
 		lex.start = lex.pos + 1
 
 	case '=':
-		if lex.items[len(lex.items)-1].typ != itemEquals {
+		if lex.items[len(lex.items)-1].typ != itemDoubleQuotes {
 			tempItem := item{
 				typ:  itemEquals,
 				pos:  lex.pos,

@@ -47,7 +47,6 @@ func main() {
 	parser := ps.NewParser(manager.FileData, &logger)
 	err = parser.Parse()
 	must(err, &logger)
-
 	worker := wk.NewWorker(&logger)
 	err = manager.GenerateFileList(parser, parser.CompilerDetails.Start)
 	must(err, &logger)

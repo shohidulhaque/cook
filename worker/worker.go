@@ -24,7 +24,7 @@ func (wor *Worker) CompileFirst(par ps.Parser, man mg.Manager) error {
 	for key, value := range man.FileList {
 		wor.Logger.ReportSuccess("Compiling " + value)
 		cmd := exec.Command(par.CompilerDetails.Binary, "-c", value,
-			"-o", "Cooking/"+key+".o", par.CompilerDetails.OtherFlags)
+			"-o", "Cooking/"+key+".o")
 		err := checkCommand(cmd, wor)
 
 		if err != nil {
@@ -52,7 +52,7 @@ func (wor *Worker) CompareAndCompile(par ps.Parser, man *mg.Manager) error {
 
 			wor.Logger.ReportSuccess("Compiling " + value)
 			cmd := exec.Command(par.CompilerDetails.Binary, "-c", value,
-				"-o", "Cooking/"+key+".o", par.CompilerDetails.OtherFlags)
+				"-o", "Cooking/"+key+".o")
 			err = checkCommand(cmd, wor)
 
 			if err != nil {
