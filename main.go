@@ -47,9 +47,7 @@ func main() {
 	parser := ps.NewParser(manager.FileData, &logger)
 	err = parser.Parse()
 	must(err, &logger)
-	worker := wk.NewWorker(&logger)
-	err = manager.GenerateFileList(parser, parser.CompilerDetails.Start)
-	must(err, &logger)
+	worker := wk.NewWorker(&logger, &parser)
 
 	if _, err := os.Stat("Cooking/details.json"); err == nil {
 
@@ -60,7 +58,6 @@ func main() {
 		must(err, &logger)
 
 	} else {
-		_ = os.Mkdir("Cooking", 0755)
 		err = manager.GenerateList()
 		must(err, &logger)
 		err = worker.CompileFirst(parser, manager)

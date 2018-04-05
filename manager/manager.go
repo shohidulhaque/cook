@@ -32,6 +32,7 @@ type Manager struct {
 	HashJSONold    Parent
 	HashJSONnew    Parent
 	Logger         *lg.Logger
+	tobeCompared   bool
 }
 
 //ReadDetails  Reading from the details.json file
@@ -145,12 +146,20 @@ func NewManager(log *lg.Logger) (Manager, error) {
 
 	recipe := string(temp)
 
+	_, err = os.Stat("Cooking/details.json")
+	toCompare := true
+
+	if err != nil {
+		toCompare = false
+	}
+
 	man := Manager{
 		FileData:       recipe,
 		NewFileTimings: make(map[string]uint32),
 		OldFileTimings: make(map[string]uint32),
 		FileList:       make(map[string]string),
 		Logger:         log,
+		tobeCompared:   toCompare,
 	}
 	man.Logger.ReportSuccess("Successfully created a Manager Object")
 	return man, nil

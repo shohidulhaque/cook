@@ -45,26 +45,21 @@ func (log *Logger) ReportWarning(line string) {
 //WriteLog  Function to write the files in the log directory
 func (log *Logger) WriteLog() {
 
-	if _, err := os.Stat("Cooking/log"); err != nil {
-		os.Mkdir("Cooking", 0755)
-		os.Mkdir("Cooking/log", 0755)
-	}
-
 	suffix := "======================================================="
 	suffix += suffix + "\n"
 	log.SuccessLog += suffix
 	log.ErrorsLog += suffix
 	log.WarningsLog += suffix
 
-	file, _ := os.OpenFile("Cooking/log/build.success",
+	file, _ := os.OpenFile("Cooking/Log/build.success",
 		os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	file.Write([]byte(log.SuccessLog))
 
-	file, _ = os.OpenFile("Cooking/log/build.errors",
+	file, _ = os.OpenFile("Cooking/Log/build.errors",
 		os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	file.Write([]byte(log.ErrorsLog))
 
-	file, _ = os.OpenFile("Cooking/log/build.warnings",
+	file, _ = os.OpenFile("Cooking/Log/build.warnings",
 		os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	file.Write([]byte(log.WarningsLog))
 

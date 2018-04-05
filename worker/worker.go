@@ -14,7 +14,14 @@ import (
 
 //Worker  Data Structure to hold flags necessary for the worker object
 type Worker struct {
-	Logger *lg.Logger
+	Logger  *lg.Logger
+	Parser  *ps.Parser
+	Manager *mg.Manager
+}
+
+//Compile  Compile the list of files
+func (wor *Worker) Compile() {
+
 }
 
 //CompileFirst  Function for compiling the files for the first time
@@ -103,10 +110,14 @@ func checkCommand(cmd *exec.Cmd, wor *Worker) error {
 }
 
 //NewWorker  Function to create a new worker
-func NewWorker(log *lg.Logger) Worker {
+func NewWorker(log *lg.Logger, par *ps.Parser) Worker {
 	wor := Worker{
 		Logger: log,
+		Parser: par,
 	}
-
+	os.Mkdir("Cooking", 0755)
+	os.Mkdir("Cache", 0755)
+	os.Mkdir("Build", 0755)
+	os.Mkdir("Log", 0755)
 	return wor
 }
